@@ -30,10 +30,9 @@ export const TodoList: React.FC<Props> = ({
 
       {!!tempTodo && (
         <TodoTask
-          key={tempTodo.id}
           todo={tempTodo}
           onDeleteTodo={onDeleteTodo}
-          isLoading={removedTodosId.includes(tempTodo.id)}
+          isLoading={true}
         />
       )}
     </section>

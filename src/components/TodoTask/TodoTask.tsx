@@ -49,7 +49,6 @@ export const TodoTask: React.FC<Props> = ({
         className={classNames('todo__remove')}
         data-cy="TodoDelete"
         onClick={() => onDeleteTodo(todo.id)}
-        onChange={() => {}}
       >
         ×
       </button>

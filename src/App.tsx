@@ -76,9 +76,15 @@ export const App: React.FC = () => {
       .filter(todo => todo.completed)
       .map(todo => todo.id);
 
-    for (const todoId of completedTodosId) {
-      fetchDeleteTodo(todoId);
-    }
+    // for (const todoId of completedTodos) {
+    //   fetchDeleteTodo(todoId);
+    // }
+
+    Promise.allSettled(
+      completedTodosId.map(async id => {
+        await fetchDeleteTodo(id);
+      }),
+    );
   }
 
   useEffect(() => {
