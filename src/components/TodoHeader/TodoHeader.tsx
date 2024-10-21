@@ -1,19 +1,18 @@
 import classNames from 'classnames';
 import React, { useEffect, useRef, useState } from 'react';
-import { Errors } from '../../types/Errors';
 
 type Props = {
   countOfTodos: number;
   countOfCompletedTodos: number;
-  fetchAddTodo: (title: string) => Promise<boolean>;
-  setErrorMessage: (error: Errors) => void;
+  handleAddTodo: (title: string) => Promise<void>;
+  setErrorMessage: (error: string) => void;
   isInputDisabled: boolean;
 };
 
 export const TodoHeader: React.FC<Props> = ({
   countOfTodos,
   countOfCompletedTodos,
-  fetchAddTodo,
+  handleAddTodo,
   setErrorMessage,
   isInputDisabled,
 }) => {
@@ -24,12 +23,15 @@ export const TodoHeader: React.FC<Props> = ({
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (inputText.trim()) {
-      if (await fetchAddTodo(inputText.trim())) {
-        setInputText('');
+    try {
+      await handleAddTodo(inputText);
+      setInputText('');
+    } catch (error) {
+      if (error instanceof Error) {
+        setErrorMessage(error.message);
+      } else {
+        setErrorMessage(String(error));
       }
-    } else {
-      setErrorMessage(Errors.emptyTitleError);
     }
   }
 

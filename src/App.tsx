@@ -15,10 +15,10 @@ export const App: React.FC = () => {
   const [tempTodo, setTempTodo] = useState<Todo | null>(null);
   const [completedCategory, setCompletedCategory] =
     useState<TodoCompletedCategory>(TodoCompletedCategory.all);
-  const [errorMessage, setErrorMessage] = useState<Errors>(Errors.noneError);
+  const [errorMessage, setErrorMessage] = useState<string>(Errors.noneError);
   const [removedTodosId, setRemovedTodosId] = useState([0]);
 
-  const filtredTodos = filterTodosByComplated(todos, completedCategory);
+  const filteredTodos = filterTodosByComplated(todos, completedCategory);
   const countOfCompletedTodos = todos.filter(todo => todo.completed).length;
   const countOfNotCompletedTodos = todos.length - countOfCompletedTodos;
   const isSomeTodoComplated = todos.some(todo => todo.completed);
@@ -33,10 +33,16 @@ export const App: React.FC = () => {
     }
   }
 
-  async function fetchAddTodo(newTitle: string) {
+  async function handleAddTodo(newTitle: string) {
+    const formatedTitle = newTitle.trim();
+
+    if (!formatedTitle) {
+      throw new Error(Errors.emptyTitleError);
+    }
+
     let newTodo: Todo = {
       id: 0,
-      title: newTitle,
+      title: formatedTitle,
       userId: 0,
       completed: false,
     };
@@ -44,22 +50,18 @@ export const App: React.FC = () => {
     setTempTodo(newTodo);
 
     try {
-      newTodo = await createTodo(newTitle);
+      newTodo = await createTodo(formatedTitle);
     } catch {
-      setErrorMessage(Errors.addError);
+      throw new Error(Errors.addError);
     } finally {
       setTempTodo(null);
       if (newTodo.id !== 0) {
         setTodos(currentTodos => [...currentTodos, newTodo]);
-
-        return true;
-      } else {
-        return false;
       }
     }
   }
 
-  async function fetchDeleteTodo(todoId: number) {
+  async function handleDeleteTodo(todoId: number) {
     try {
       setRemovedTodosId(current => [...current, todoId]);
       await deleteTodo(todoId);
@@ -76,13 +78,9 @@ export const App: React.FC = () => {
       .filter(todo => todo.completed)
       .map(todo => todo.id);
 
-    // for (const todoId of completedTodos) {
-    //   fetchDeleteTodo(todoId);
-    // }
-
     Promise.allSettled(
       completedTodosId.map(async id => {
-        await fetchDeleteTodo(id);
+        await handleDeleteTodo(id);
       }),
     );
   }
@@ -99,17 +97,17 @@ export const App: React.FC = () => {
         <TodoHeader
           countOfTodos={todos.length}
           countOfCompletedTodos={countOfCompletedTodos}
-          fetchAddTodo={fetchAddTodo}
+          handleAddTodo={handleAddTodo}
           setErrorMessage={setErrorMessage}
           isInputDisabled={!!tempTodo}
         />
         {!!todos.length && (
           <>
             <TodoList
-              todos={filtredTodos}
+              todos={filteredTodos}
               tempTodo={tempTodo}
               removedTodosId={removedTodosId}
-              onDeleteTodo={fetchDeleteTodo}
+              onDeleteTodo={handleDeleteTodo}
             />
             <TodoFooter
               countOfNotCompletedTodos={countOfNotCompletedTodos}

@@ -3,7 +3,7 @@ import { Errors } from '../../types/Errors';
 import classNames from 'classnames';
 
 type Props = {
-  errorMessage: Errors;
+  errorMessage: string;
   onErrorMessage: (error: Errors) => void;
 };
 
